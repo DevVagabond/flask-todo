@@ -2,11 +2,11 @@ import json
 
 
 class TaskModel:
-    def __init__(self, id, title, description):
+    def __init__(self, id, title, description, status=False):
         self.id = id
         self.title = title
         self.description = description
-        self.status = 'pending'
+        self.status = status if status else 'pending'
 
     def __to_dict(self):
         return {
