@@ -13,3 +13,9 @@ class TaskResource(Resource):
         self.description = json_data['description']
         self.status = json_data['status'] if json_data['status'] else 'pending'
         return TaskController.create_task(1, self.title, self.description, self.status)
+
+
+class GetTaskById(Resource):
+    def get(self, taskId):
+        print("getting taskid::", taskId)
+        return TaskController.get_task_by_id(taskId)
