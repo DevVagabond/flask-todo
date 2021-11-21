@@ -1,6 +1,7 @@
 from flask_restful import Resource
 from ..controllers.task_controller import TaskController
 from flask import request
+import uuid
 
 
 class TaskResource(Resource):
@@ -11,11 +12,11 @@ class TaskResource(Resource):
         json_data = request.get_json(force=True)
         self.title = json_data['title']
         self.description = json_data['description']
-        self.status = json_data['status'] if json_data['status'] else 'pending'
-        return TaskController.create_task(1, self.title, self.description, self.status)
+        self.status = json_data['status']
+        self.task_id = str(uuid.uuid4())
+        return TaskController.create_task(self.task_id, self.title, self.description, self.status)
 
 
 class GetTaskById(Resource):
     def get(self, taskId):
-        print("getting taskid::", taskId)
         return TaskController.get_task_by_id(taskId)

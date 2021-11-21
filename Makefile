@@ -23,6 +23,7 @@ setup:
 	@echo "Virtualenv activated"
 	pip install -r requirements.txt
 	@echo "Requirements installed"
+	@echo "run 'make run' command to start the server"
 
 
 
