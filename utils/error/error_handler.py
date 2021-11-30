@@ -1,4 +1,4 @@
-from typing import Dict, Literal
+from typing import Literal
 from flask import Response
 import jsonpickle
 

@@ -1,7 +1,5 @@
 from ..models.task_model import TaskModel, StatusEnum
-from flask import Response
 from typing import List
-import jsonpickle
 from ..utils.response.message import APIResponseMessage
 from ..utils.response.response_handler import ResponseHandler
 from ..utils.error.error_handler import ErrorHandler
