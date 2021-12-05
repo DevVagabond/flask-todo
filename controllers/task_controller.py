@@ -1,11 +1,9 @@
-from ..models.task_model import TaskModel, StatusEnum
-from typing import List
+from ..models.task_model import StatusEnum
 from ..utils.response.message import APIResponseMessage
 from ..utils.response.response_handler import ResponseHandler
 from ..utils.error.error_handler import ErrorHandler
 from ..utils.error.errors import APIError
-
-TASKS: List[TaskModel] = []
+from ..db.__init__ import getDbModels
 
 
 class TaskController:
@@ -15,15 +13,18 @@ class TaskController:
     def create_task(taskId, title, description, status):
         try:
             status = status if status else StatusEnum.PENDING
-            new_task = TaskModel(taskId=taskId, title=title,
-                                 description=description, status=status)
-            TASKS.append(new_task)
-            new_task_dict = new_task.__dict__
+            Models = getDbModels()
+            new_task = Models["TaskModel"](uuid=taskId, title=title,
+                                           description=description, status=status)
+
+            Models["DB"].session.add(new_task)
+            Models["DB"].session.commit()
 
             response = {
-                'taskId': new_task_dict['taskId'],
-                'title': new_task_dict['title'],
-                'description': new_task_dict['description'],
+                'id': new_task.id,
+                'uuid': new_task.uuid,
+                'title': new_task.title,
+                'description': new_task.description,
             }
 
             return ResponseHandler.create_response(response, APIResponseMessage.SUCCESS)
@@ -31,23 +32,47 @@ class TaskController:
         except Exception as e:
             return ErrorHandler.handle_error(error=APIError.BAD_REQUEST, message=str(e))
 
-    def get_all_tasks():
-        task_list = [task.__dict__ for task in TASKS]
-        return ResponseHandler.create_response(task_list, APIResponseMessage.SUCCESS)
+    def get_all_tasks(params):
+        try:
+            Models = getDbModels()
+            taskObject = Models["TaskModel"].query.paginate(
+                page=params.get("page"), per_page=params.get("per_page"), error_out=False)
+            total = taskObject.total
+            tasks = taskObject.items
+            taskList = []
+            for task in tasks:
+                taskList.append({
+                    'id': task.id,
+                    'uuid': task.uuid,
+                    'title': task.title,
+                    'description': task.description,
+                    'status': task.status
+                })
+            response = {
+                'total': total,
+                'page': params["page"],
+                'per_page': params["per_page"],
+                'tasks': taskList
+            }
+            return ResponseHandler.create_response(response, APIResponseMessage.SUCCESS)
+        except Exception as e:
+            return ErrorHandler.handle_error(error=APIError.BAD_REQUEST, message=str(e))
 
     def get_task_by_id(taskId):
         try:
-            tasks = [task for task in TASKS if task.taskId == taskId]
+            Models = getDbModels()
+            task = Models["TaskModel"].query.get(taskId)
 
-            if tasks:
-                task = tasks.__getitem__(0).__dict__
-                response = {
-                    'taskId': task['taskId'],
-                    'title': task['title'],
-                    'description': task['description'],
-                }
-                return ResponseHandler.create_response(response, APIResponseMessage.SUCCESS)
-            else:
-                return ErrorHandler.handle_error(error=APIError.NOT_FOUND, message=f'Task with taskId "{taskId}" not found')
+            if (task is None):
+                return ErrorHandler.handle_error(error=APIError.NOT_FOUND, message=f"Task with id {taskId} not found")
+
+            response = {
+                'id': task.id,
+                'uuid': task.uuid,
+                'title': task.title,
+                'description': task.description,
+                'status': task.status
+            }
+            return ResponseHandler.create_response(response, APIResponseMessage.SUCCESS)
         except Exception as e:
             return ErrorHandler.handle_error(error=APIError.BAD_REQUEST, message=str(e))

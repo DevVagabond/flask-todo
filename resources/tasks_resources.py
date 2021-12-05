@@ -6,7 +6,14 @@ import uuid
 
 class TaskResource(Resource):
     def get(self):
-        return TaskController.get_all_tasks()
+        page = request.args.get('page') if request.args.get('page') else 1
+        per_page = request.args.get(
+            'per_page') if request.args.get('per_page') else 5
+
+        return TaskController.get_all_tasks({
+            'page': int(page),
+            'per_page': int(per_page)
+        })
 
     def post(self):
         json_data = request.get_json(force=True)
