@@ -20,7 +20,7 @@ flask-todo requires [Python](https://www.python.org/) to run.
 Install the dependencies and devDependencies and start the server.
 
 ```sh
-cd todo-flask
+cd flask-todo
 cp .env.example .env  #create .env file from .env.example file, change SQL database url
 make setup
 make run
@@ -28,7 +28,7 @@ make run
 
 For production environments...
 
- - change the value  of ``FLASK_ENV`` in .env file
+ - change the value  of ``FLASK_ENV`` in .env file to 'production'
 ```sh
 make run
 ```
